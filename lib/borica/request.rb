@@ -17,7 +17,19 @@ module Borica
       22, # Execute delayed authorization
       23, # Reverse request delayed authorization
       40, # Reversal
-      41, # Reverse payment
+      41  # Reverse payment
+    ]
+
+    PROTOCOL_VERSIONS = [
+      '1.0',
+      '1.1',
+      '2.0'
+    ]
+
+    CURRENCIES = [
+      'USD',
+      'EUR',
+      'BGN'
     ]
 
     attr_reader :transaction_type
@@ -28,6 +40,8 @@ module Borica
     attr_reader :order_summary
     attr_reader :language
     attr_reader :protocol_version
+    attr_reader :currency
+    attr_reader :one_time_ticket
     attr_reader :signature
 
     def initialize(transaction_type:,
@@ -36,43 +50,38 @@ module Borica
                    order_id:,
                    order_summary:,
                    signature:,
+                   one_time_ticket: nil,
                    transaction_timestamp: Time.now,
                    language: 'EN',
-                   protocol_version: '1.0')
-      @transaction_type = ensure_valid_transaction_type(transaction_type)
+                   protocol_version: '1.0',
+                   currency: 'EUR')
+      @transaction_type = validate(transaction_type.to_i, of: TRANSACTION_TYPES)
       @transaction_timestamp = transaction_timestamp
       @transaction_amount = transaction_amount.to_s.sub('.', '')
       @terminal_id = terminal_id
       @order_id = order_id
       @order_summary = order_summary
       @language = language.to_s.upcase
-      @protocol_version = protocol_version
+      @protocol_version = validate(protocol_version.to_s, of: PROTOCOL_VERSIONS)
+      @currency = validate(currency.to_s.upcase, of: CURRENCIES)
+      @one_time_ticket = one_time_ticket
       @signature = signature
     end
 
     def to_s
-      Base64.urlsafe_encode64 [
-        fill(transaction_type, 2),
-        fill(transaction_timestamp.strftime('%Y%m%d%H%M%S'), 14),
-        fill(transaction_amount, 12, char: '0', right: true),
-        fill(terminal_id, 8),
-        fill(order_id, 15),
-        fill(order_summary, 125),
-        fill(language, 2),
-        fill(protocol_version, 3),
-        fill(signature.sign, 128)
-      ].join
+      Base64.urlsafe_encode64(
+        unsigned_content + signature.sign(unsigned_content))
     end
 
     private
 
-    def ensure_valid_transaction_type(transaction_type)
-      unless TRANSACTION_TYPES.include?(transaction_type.to_i)
-        raise ArgumentError, "Invalid transaction type of #{transaction_type}, " \
-                             "valid values are #{TRANSACTION_TYPES.inspect}"
+    def validate(value, of:)
+      unless of.include?(value)
+        raise ArgumentError, "Expected one of #{of.inspect}, " \
+                             "got: #{value.inspect}"
       end
 
-      transaction_type
+      value
     end
 
     def fill(object, length, char: ' ', right: false)
@@ -83,6 +92,21 @@ module Borica
       else
         truncated.ljust(length, char)
       end
+    end
+
+    def unsigned_content
+      @unsigned_content ||= [
+        fill(transaction_type, 2),
+        fill(transaction_timestamp.strftime('%Y%m%d%H%M%S'), 14),
+        fill(transaction_amount, 12, char: '0', right: true),
+        fill(terminal_id, 8),
+        fill(order_id, 15),
+        fill(order_summary, 125),
+        fill(language, 2),
+        fill(protocol_version, 3),
+        (fill(currency, 3) if protocol_version > '1.0'),
+        (one_time_ticket if protocol_version == '2.0')
+      ].compact.join
     end
   end
 end

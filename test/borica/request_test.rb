@@ -5,7 +5,7 @@ require 'test_helper'
 module Borica
   class RequestTest < Minitest::Test
     class FakeSignature
-      def sign
+      def sign(_content)
         'G' * 128
       end
     end
