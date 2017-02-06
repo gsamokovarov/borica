@@ -52,7 +52,7 @@ module Borica
       Base64.urlsafe_encode64 [
         fill(transaction_type, 2),
         fill(transaction_timestamp.strftime('%Y%m%d%H%M%S'), 14),
-        fill(transaction_amount, 12, char: '0'),
+        fill(transaction_amount, 12, char: '0', right: true),
         fill(terminal_id, 8),
         fill(order_id, 15),
         fill(order_summary, 125),
@@ -73,8 +73,14 @@ module Borica
       transaction_type
     end
 
-    def fill(object, length, char: ' ')
-      object.to_s[0...length].rjust(length, char)
+    def fill(object, length, char: ' ', right: false)
+      truncated = object.to_s[0...length]
+
+      if right
+        truncated.rjust(length, char)
+      else
+        truncated.ljust(length, char)
+      end
     end
   end
 end
