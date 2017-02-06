@@ -58,5 +58,15 @@ module Borica
                     signature: FakeSignature.new
       end
     end
+
+    def test_currency_as_symbols
+      Request.new transaction_type: 10,
+                  transaction_amount: '99.99',
+                  terminal_id: '12345678',
+                  order_id: '12345678',
+                  order_summary: 'Money for fun!',
+                  currency: :eur,
+                  signature: FakeSignature.new
+    end
   end
 end

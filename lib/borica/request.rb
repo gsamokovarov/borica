@@ -69,16 +69,14 @@ module Borica
     end
 
     def to_s
-      Base64.urlsafe_encode64(
-        unsigned_content + signature.sign(unsigned_content))
+      Base64.urlsafe_encode64(unsigned_content + signature.sign(unsigned_content))
     end
 
     private
 
     def validate(value, of:)
       unless of.include?(value)
-        raise ArgumentError, "Expected one of #{of.inspect}, " \
-                             "got: #{value.inspect}"
+        raise ArgumentError, "Expected one of #{of.inspect}, got: #{value.inspect}"
       end
 
       value
