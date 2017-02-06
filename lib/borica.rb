@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'borica/version'
 require 'borica/request'
 
