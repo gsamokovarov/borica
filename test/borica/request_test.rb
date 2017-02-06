@@ -8,7 +8,7 @@ module Borica
       end
     end
 
-    def test_general_request_formatting
+    def test_general_request_base64_formatting
       request = Request.new transaction_type: 10,
                             transaction_amount: '99.99',
                             transaction_timestamp: Time.at(0),
@@ -17,7 +17,7 @@ module Borica
                             order_summary: 'Money for fun!',
                             signature: FakeSignature.new
 
-      expected_request = "MTAxOTcwMDEwMTAyMDAwMDAwMDAwMDAwOTk5OTEyMzQ1Njc4MTIzNDU2NzhNb25leSBmb3IgZnVuIUVOMS4wR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0c="
+      expected_request = "MTAxOTcwMDEwMTAyMDAwMDAwMDAwMDAwOTk5OTEyMzQ1Njc4ICAgICAgIDEyMzQ1Njc4ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgTW9uZXkgZm9yIGZ1biFFTjEuMEdHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dH"
 
       assert_equal expected_request, request.to_s
     end

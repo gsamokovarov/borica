@@ -39,26 +39,26 @@ module Borica
                    protocol_version: '1.0')
       @transaction_type = ensure_valid_transaction_type(transaction_type)
       @transaction_timestamp = transaction_timestamp
-      @transaction_amount = transaction_amount
+      @transaction_amount = transaction_amount.to_s.sub('.', '')
       @terminal_id = terminal_id
       @order_id = order_id
       @order_summary = order_summary
-      @language = language
+      @language = language.to_s.upcase
       @protocol_version = protocol_version
       @signature = signature
     end
 
     def to_s
       Base64.urlsafe_encode64 [
-        transaction_type,
-        transaction_timestamp.strftime('%Y%m%d%H%M%S'),
-        transaction_amount.to_s.sub('.', '').rjust(12, '0'),
-        terminal_id.to_s[0...8],
-        order_id.to_s[0...15],
-        order_summary.to_s[0...125],
-        language.to_s.upcase[0...2],
-        protocol_version.to_s[0...3],
-        signature.sign
+        fill(transaction_type, 2),
+        fill(transaction_timestamp.strftime('%Y%m%d%H%M%S'), 14),
+        fill(transaction_amount, 12, char: '0'),
+        fill(terminal_id, 8),
+        fill(order_id, 15),
+        fill(order_summary, 125),
+        fill(language, 2),
+        fill(protocol_version, 3),
+        fill(signature.sign, 128)
       ].join
     end
 
@@ -71,6 +71,10 @@ module Borica
       end
 
       transaction_type
+    end
+
+    def fill(object, length, char: ' ')
+      object.to_s[0...length].rjust(length, char)
     end
   end
 end
