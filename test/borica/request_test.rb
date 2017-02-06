@@ -24,14 +24,25 @@ module Borica
       assert_equal expected_request, request.to_s
     end
 
-    def test_version_validation
+    def test_protocol_version_validation
       assert_raises ArgumentError do
         Request.new transaction_type: 10,
                     transaction_amount: '99.99',
                     terminal_id: '12345678',
                     order_id: '12345678',
                     order_summary: 'Money for fun!',
-                    version: '3.0',
+                    protocol_version: '3.0',
+                    signature: FakeSignature.new
+      end
+    end
+
+    def test_transaction_type_validation
+      assert_raises ArgumentError do
+        Request.new transaction_type: 999,
+                    transaction_amount: '99.99',
+                    terminal_id: '12345678',
+                    order_id: '12345678',
+                    order_summary: 'Money for fun!',
                     signature: FakeSignature.new
       end
     end
